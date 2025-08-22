@@ -4,23 +4,17 @@ on:
   check_run:
     types: [completed]
 
-# concurrency:
-#   group: ${{ github.workflow }}-${{ github.ref }}
-#   cancel-in-progress: true
-
 jobs:
   test:
     runs-on: ubuntu-latest
     if: ${{ github.event.check_run.app.name == 'Cloudflare Workers and Pages' && github.event.check_run.conclusion == 'success' }}
     concurrency:
-      group: ${{ github.workflow }}-${{ github.event.check_run.check_suite.head_sha }}
+      group: ${{ github.workflow }}-${{ github.event.check_run.check_suite.head_branch }}
       cancel-in-progress: true
     steps:
       - run: |
           echo "Event: ${{ toJson(github.event.check_run) }}"
           echo "Check name: ${{ github.event.check_run.check_suite.head_sha }}"
-          echo "Github workflow: ${{ toJson(github.workflow) }}"
-          echo "Github ref: ${{ toJson(github.ref) }}"
 
       - name: Add check_run
         if: ${{false}}
