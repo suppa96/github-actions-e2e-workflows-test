@@ -9,7 +9,7 @@ jobs:
     outputs:
       check_run_id: ${{ steps.add_check_run.outputs.check_run_id }}
     permissions:
-      deployments: write
+      checks: write
     runs-on: ubuntu-latest
     if: ${{ github.event.check_run.app.name == 'Cloudflare Workers and Pages' && github.event.check_run.conclusion == 'success' }}
     concurrency:
