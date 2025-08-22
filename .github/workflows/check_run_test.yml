@@ -21,6 +21,7 @@ jobs:
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
+            console.log('Check run event received:', context.payload.check_run.check_suite.head_branch);
 
             // Create a new check run (as a demonstration)
             await github.rest.checks.create({
