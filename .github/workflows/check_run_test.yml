@@ -7,7 +7,7 @@ on:
 jobs:
   create_check_run:
     permissions:
-      checks: write
+      deployments: write
     runs-on: ubuntu-latest
     if: ${{ github.event.check_run.app.name == 'Cloudflare Workers and Pages' && github.event.check_run.conclusion == 'success' }}
     concurrency:
@@ -26,12 +26,12 @@ jobs:
             console.log('Check run event received:', context.payload.check_run.check_suite.head_branch);
 
             // Create a new check run (as a demonstration)
-            await github.rest.checks.create({
+            await github.rest.deployments.create({
             owner: context.repo.owner,
             repo: context.repo.repo,
-            name: 'Custom Follow-up Check',
+            name: 'End to End Test Run',
             head_sha: context.payload.check_run.check_suite.head_sha,
-            status: 'completed',
+            status: 'in_progress',
             conclusion: context.payload.check_run.conclusion,
             output: {
                 title: 'Custom Check Suite Added',
