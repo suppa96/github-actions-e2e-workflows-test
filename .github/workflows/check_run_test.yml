@@ -14,7 +14,6 @@ jobs:
     steps:
       - name: Log event details
         run: |
-          echo "Event: ${{ toJson(github.event.check_run) }}"
           echo "Check name: ${{ github.event.check_run.check_suite.head_sha }}"
 
       - name: Add check_run
