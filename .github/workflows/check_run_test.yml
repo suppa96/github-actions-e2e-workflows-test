@@ -59,7 +59,7 @@ jobs:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
             // Finalize the check run after 10 seconds
-            const checkRunId = $CHECK_RUN_ID;
+            const checkRunId = process.env.CHECK_RUN_ID;
             await github.rest.checks.update({
                 owner: context.repo.owner,
                 repo: context.repo.repo,
