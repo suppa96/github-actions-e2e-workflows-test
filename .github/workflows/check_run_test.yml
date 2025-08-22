@@ -14,7 +14,7 @@ jobs:
     steps:
       - name: Log event details
         run: |
-          echo "Check name: ${{ github.event.check_run.check_suite.head_sha }}"
+          echo "Check name: ${{ github.workflow }}-${{ github.event.check_run.check_suite.head_branch }}"
 
       - name: Add check_run
         uses: actions/github-script@v7
