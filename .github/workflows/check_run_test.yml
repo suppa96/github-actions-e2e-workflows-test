@@ -5,7 +5,9 @@ on:
     types: [completed]
 
 jobs:
-  test:
+  create_check_run:
+    permissions:
+      checks: write
     runs-on: ubuntu-latest
     if: ${{ github.event.check_run.app.name == 'Cloudflare Workers and Pages' && github.event.check_run.conclusion == 'success' }}
     concurrency:
