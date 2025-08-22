@@ -12,12 +12,12 @@ jobs:
       group: ${{ github.workflow }}-${{ github.event.check_run.check_suite.head_branch }}
       cancel-in-progress: true
     steps:
-      - run: |
+      - name: Log event details
+        run: |
           echo "Event: ${{ toJson(github.event.check_run) }}"
           echo "Check name: ${{ github.event.check_run.check_suite.head_sha }}"
 
       - name: Add check_run
-        if: ${{false}}
         uses: actions/github-script@v7
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
