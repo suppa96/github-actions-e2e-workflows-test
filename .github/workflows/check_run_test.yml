@@ -7,7 +7,7 @@ on:
 jobs:
   create_check_run:
     outputs:
-      check_run_id: ${{ steps.add_check_run.outputs.check_run_id }}
+      check_run_id: ${{ steps.add_check_run.outputs.result }}
     permissions:
       checks: write
     runs-on: ubuntu-latest
@@ -21,9 +21,11 @@ jobs:
           echo "Check name: ${{ github.workflow }}-${{ github.event.check_run.check_suite.head_branch }}"
 
       - name: Add check_run
+        id: add_check_run
         uses: actions/github-script@v7
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
+          result-encoding: string
           script: |
             console.log('Check run event received:', context.payload.check_run.check_suite.head_branch);
 
@@ -40,7 +42,7 @@ jobs:
                 }
               });
               console.log('Created check run with ID:', checkRun.data.id);
-              core.setOutput('check_run_id', checkRun.data.id);
+              return checkRun.data.id;
 
   e2e-tests:
     runs-on: ubuntu-latest
