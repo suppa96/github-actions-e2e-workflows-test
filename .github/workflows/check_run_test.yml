@@ -39,6 +39,7 @@ jobs:
                   summary: 'This is a custom check run added after another check completed.'
                 }
               });
+              console.log('Created check run with ID:', checkRun.data.id);
               core.setOutput('check_run_id', checkRun.data.id);
 
   e2e-tests:
