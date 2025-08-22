@@ -6,6 +6,8 @@ on:
 
 jobs:
   create_check_run:
+    outputs:
+      check_run_id: ${{ steps.add_check_run.outputs.check_run_id }}
     permissions:
       deployments: write
     runs-on: ubuntu-latest
@@ -26,15 +28,44 @@ jobs:
             console.log('Check run event received:', context.payload.check_run.check_suite.head_branch);
 
             // Create a new check run (as a demonstration)
-            await github.rest.deployments.create({
-            owner: context.repo.owner,
-            repo: context.repo.repo,
-            name: 'End to End Test Run',
-            head_sha: context.payload.check_run.check_suite.head_sha,
-            status: 'in_progress',
-            conclusion: context.payload.check_run.conclusion,
-            output: {
-                title: 'Custom Check Suite Added',
-                summary: 'This is a custom check run added after another check completed.'
-            }
+              const checkRun = await github.rest.checks.create({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                name: 'End to End Test Run',
+                head_sha: context.payload.check_run.check_suite.head_sha,
+                status: 'in_progress',
+                output: {
+                  title: 'Custom Check Suite Added',
+                  summary: 'This is a custom check run added after another check completed.'
+                }
+              });
+              core.setOutput('check_run_id', checkRun.data.id);
+
+  e2e-tests:
+    runs-on: ubuntu-latest
+    needs: create_check_run
+    if: ${{ needs.create_check_run.outputs.check_run_id }}
+    steps:
+      - name: Sleep for 10 seconds
+        run: sleep 10
+
+      - name: Finalize check run
+        uses: actions/github-script@v7
+        env:
+          CHECK_RUN_ID: ${{ needs.create_check_run.outputs.check_run_id }}
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            // Finalize the check run after 10 seconds
+            const checkRunId = $CHECK_RUN_ID;
+            await github.rest.checks.update({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                check_run_id: checkRunId,
+                status: 'completed',
+                conclusion: 'success',
+                output: {
+                    title: 'E2E Tests Completed',
+                    summary: 'This is a custom check run that has been completed successfully.'
+                }
             });
