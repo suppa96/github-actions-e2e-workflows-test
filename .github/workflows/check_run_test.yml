@@ -5,7 +5,9 @@ on:
     types: [completed]
 
 jobs:
-  test:
+  create_check_run:
+    permissions:
+      checks: write
     runs-on: ubuntu-latest
     if: ${{ github.event.check_run.app.name == 'Cloudflare Workers and Pages' && github.event.check_run.conclusion == 'success' }}
     concurrency:
@@ -17,21 +19,31 @@ jobs:
           echo "Check name: ${{ github.workflow }}-${{ github.event.check_run.check_suite.head_branch }}"
 
       - name: Add check_run
+        id: add_check_run
         uses: actions/github-script@v7
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
+          result-encoding: string
           script: |
+            const checkRunEvent = context.payload.check_run;
+
+            const currentCheckSuite = checkRunEvent.check_suite;
+            const previewUrlMatch = checkRunEvent.output.summary.match(/Preview URL:[^<]*<a href=['"]([^'"]+)['"]/);
+            const previewUrl = previewUrlMatch ? previewUrlMatch[1] : '';
+            console.log('Preview URL:', previewUrl);
 
             // Create a new check run (as a demonstration)
-            await github.rest.checks.create({
-            owner: context.repo.owner,
-            repo: context.repo.repo,
-            name: 'Custom Follow-up Check',
-            head_sha: context.payload.check_suite.head_sha,
-            status: 'completed',
-            conclusion: context.payload.check_run.conclusion,
-            output: {
-                title: 'Custom Check Suite Added',
-                summary: 'This is a custom check run added after another check completed.'
-            }
-            });
+              const checkRun = await github.rest.checks.create({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                name: 'E2E Test trigger',
+                head_sha: currentCheckSuite.head_sha,
+                status: 'completed',
+                conclusion: checkRunEvent.conclusion,
+                output: {
+                  title: 'Branch deployed successfully',
+                  branch: currentCheckSuite.head_branch,
+                  "deploy_url": previewUrl,
+                  summary: ''
+                }
+              });
