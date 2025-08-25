@@ -27,10 +27,10 @@ jobs:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           result-encoding: string
           script: |
-            const checkRun = context.payload.check_run;
+            const checkRunEvent = context.payload.check_run;
 
-            const currentCheckSuite = checkRun.check_suite;
-            const previewUrlMatch = checkRun.output.summary.match(/Preview URL:[^<]*<a href=['"]([^'"]+)['"]/);
+            const currentCheckSuite = checkRunEvent.check_suite;
+            const previewUrlMatch = checkRunEvent.output.summary.match(/Preview URL:[^<]*<a href=['"]([^'"]+)['"]/);
             const previewUrl = previewUrlMatch ? previewUrlMatch[1] : '';
             console.log('Preview URL:', previewUrl);
 
@@ -41,40 +41,11 @@ jobs:
                 name: 'E2E Test trigger',
                 head_sha: currentCheckSuite.head_sha,
                 status: 'completed',
-                conclusion: checkRun.conclusion,
+                conclusion: checkRunEvent.conclusion,
                 output: {
                   title: 'Branch deployed successfully',
                   branch: currentCheckSuite.head_branch,
                   "deploy_url": previewUrl
                 }
               });
-              console.log('Created check run with ID:', checkRun.data.id);
-              return checkRun.data.id;
-
-  e2e-tests:
-    runs-on: ubuntu-latest
-    needs: create_check_run
-    steps:
-      - name: Sleep for 10 seconds
-        run: sleep 10
-
-      - name: Finalize check run
-        uses: actions/github-script@v7
-        env:
-          CHECK_RUN_ID: ${{ needs.create_check_run.outputs.check_run_id }}
-        with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          script: |
-            // Finalize the check run after 10 seconds
-            const checkRunId = process.env.CHECK_RUN_ID;
-            await github.rest.checks.update({
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                check_run_id: checkRunId,
-                status: 'completed',
-                conclusion: 'success',
-                output: {
-                    title: 'E2E Tests Completed',
-                    summary: 'This is a custom check run that has been completed successfully.'
-                }
-            });
+              console.log('Created check run with ID:', checkRunEvent.data.id);
