@@ -27,18 +27,25 @@ jobs:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           result-encoding: string
           script: |
-            console.log('Check run event received:', context.payload.check_run.check_suite.head_branch);
+            const checkRun = context.payload.check_run;
+
+            const currentCheckSuite = checkRun.check_suite;
+            const previewUrlMatch = checkRun.output.summary.match(/Preview URL:[^<]*<a href=['"]([^'"]+)['"]/);
+            const previewUrl = previewUrlMatch ? previewUrlMatch[1] : '';
+            console.log('Preview URL:', previewUrl);
 
             // Create a new check run (as a demonstration)
               const checkRun = await github.rest.checks.create({
                 owner: context.repo.owner,
                 repo: context.repo.repo,
-                name: 'End to End Test Run',
-                head_sha: context.payload.check_run.check_suite.head_sha,
-                status: 'in_progress',
+                name: 'E2E Test trigger',
+                head_sha: currentCheckSuite.head_sha,
+                status: 'completed',
+                conclusion: checkRun.conclusion,
                 output: {
-                  title: 'Custom Check Suite Added',
-                  summary: 'This is a custom check run added after another check completed.'
+                  title: 'Branch deployed successfully',
+                  branch: currentCheckSuite.head_branch,
+                  "deploy_url": previewUrl
                 }
               });
               console.log('Created check run with ID:', checkRun.data.id);
