@@ -6,8 +6,6 @@ on:
 
 jobs:
   create_check_run:
-    outputs:
-      check_run_id: ${{ steps.add_check_run.outputs.result }}
     permissions:
       checks: write
     runs-on: ubuntu-latest
@@ -49,4 +47,3 @@ jobs:
                   summary: ''
                 }
               });
-              console.log('Created check run with ID:', checkRunEvent.data.id);
