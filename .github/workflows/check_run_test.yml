@@ -45,7 +45,8 @@ jobs:
                 output: {
                   title: 'Branch deployed successfully',
                   branch: currentCheckSuite.head_branch,
-                  "deploy_url": previewUrl
+                  "deploy_url": previewUrl,
+                  summary: ''
                 }
               });
               console.log('Created check run with ID:', checkRunEvent.data.id);
